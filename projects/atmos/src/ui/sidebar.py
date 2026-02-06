@@ -3,7 +3,7 @@ from datetime import timedelta
 import pandas as pd
 import streamlit as st
 
-from ..core.data import detect_roles_fast, load_data_fast
+from core.data import detect_roles_fast, load_data_fast
 
 
 def render_sidebar():

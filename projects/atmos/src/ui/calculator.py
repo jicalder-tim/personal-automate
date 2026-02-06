@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from ..state.session import append_token, clear_console
+from state.session import append_token, clear_console
 
 
 def render_calculator():

@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 from typing import TypedDict, List, Optional
 
+
 @st.cache_data(show_spinner=False)
 def load_data_fast(file_bytes, filename):
     try:
@@ -70,11 +71,13 @@ class SpatialRole(TypedDict):
     y: Optional[str]
     z: Optional[str]
 
+
 class Roles(TypedDict):
     time: Optional[str]
     entity: Optional[str]
     spatial: SpatialRole
     numeric: List[str]
+
 
 def detect_roles_fast(df) -> Roles:
     roles: Roles = {

@@ -1,9 +1,9 @@
 import streamlit as st
-from src.state.session import init_session
-from src.ui.calculator import render_calculator
-from src.ui.sidebar import render_sidebar
-from src.ui.styles import CSS
-from src.ui.visuals import render_visuals
+from state.session import init_session
+from ui.calculator import render_calculator
+from ui.sidebar import render_sidebar
+from ui.styles import CSS
+from ui.visuals import render_visuals
 
 # =============================================================================
 # 0. CONFIGURACIÓN

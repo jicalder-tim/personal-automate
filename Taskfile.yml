@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  setup:
+    desc: Setup the project development environment
+    cmds:
+      - uv sync
+    sources:
+      - pyproject.toml
+      - uv.lock
+    generates:
+      - .venv/pyvenv.cfg

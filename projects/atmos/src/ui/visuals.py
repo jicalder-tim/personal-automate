@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from ..state.session import reset_selection
+from state.session import reset_selection
 
 
 def get_idx(opts, targets, default=0):
