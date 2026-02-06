@@ -3,21 +3,21 @@ import cadquery as cq
 # --- 1. CONFIGURACIÓN (TUS VARIABLES REGULABLES) ---
 
 # Configuración de la Grilla
-num_columnas = 10      # Cantidad de agujeros en X
-num_filas = 10          # Cantidad de agujeros en Y
-distancia_x = 15.0     # Distancia entre centros de agujeros en X (mm)
-distancia_y = 15.0     # Distancia entre centros de agujeros en Y (mm)
+num_columnas = 10  # Cantidad de agujeros en X
+num_filas = 10  # Cantidad de agujeros en Y
+distancia_x = 15.0  # Distancia entre centros de agujeros en X (mm)
+distancia_y = 15.0  # Distancia entre centros de agujeros en Y (mm)
 
 # Configuración de los Orificios
-diametro_orificio = 6.0    # Diámetro del agujero cilíndrico
+diametro_orificio = 6.0  # Diámetro del agujero cilíndrico
 radio_esfera_rebaje = 6.0  # Radio de la "esfera" imaginaria para el rebaje (debe ser mayor al radio del orificio)
-profundidad_rebaje = 2.0   # Cuánto se hunde la esfera en la placa
+profundidad_rebaje = 2.0  # Cuánto se hunde la esfera en la placa
 
 # Configuración de la Placa y Marco
-espesor_placa = 5.0    # Altura de la base donde van los agujeros
-espesor_marco = 4.0    # Grosor de las paredes del marco
-altura_marco = 12.0    # Altura total del marco (desde el suelo)
-margen_interno = 5.0   # Espacio extra entre el último agujero y el marco
+espesor_placa = 5.0  # Altura de la base donde van los agujeros
+espesor_marco = 4.0  # Grosor de las paredes del marco
+altura_marco = 12.0  # Altura total del marco (desde el suelo)
+margen_interno = 5.0  # Espacio extra entre el último agujero y el marco
 
 # --- 2. CÁLCULOS AUTOMÁTICOS DE DIMENSIONES ---
 
@@ -49,11 +49,10 @@ for i in range(num_columnas):
 # C. Hacer los orificios cilíndricos y el rebaje esférico
 # 1. Perforamos los cilindros pasantes
 placa_perforada = (
-    placa
-    .faces(">Z") # Seleccionamos la cara superior
+    placa.faces(">Z")  # Seleccionamos la cara superior
     .workplane()
     .pushPoints(puntos_grilla)
-    .hole(diametro_orificio) # Solo .hole(), sin .cutBlind()
+    .hole(diametro_orificio)  # Solo .hole(), sin .cutBlind()
 )
 
 # 2. Hacemos el rebaje esférico
@@ -73,9 +72,7 @@ for punto in puntos_grilla:
 # Creamos un bloque del tamaño total y le restamos el interior
 marco_exterior = cq.Workplane("XY").box(ancho_total, largo_total, altura_marco)
 marco_interior = cq.Workplane("XY").box(
-    ancho_total - (2 * espesor_marco),
-    largo_total - (2 * espesor_marco),
-    altura_marco
+    ancho_total - (2 * espesor_marco), largo_total - (2 * espesor_marco), altura_marco
 )
 marco = marco_exterior.cut(marco_interior)
 

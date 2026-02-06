@@ -1,5 +1,6 @@
-import trimesh
 import os
+
+import trimesh
 
 # 1. Definimos la ruta manualmente (usa la 'r' para evitar errores de barras)
 ruta_archivo = r"D:\Trabajo\TiMining\Geometrico\Specialist\Vehiculos 3D IA\truck.glb"
@@ -10,7 +11,7 @@ if os.path.exists(ruta_archivo):
     scene = trimesh.load(ruta_archivo)
 
     # 3. Exporta como .obj
-    ruta_salida = ruta_archivo.replace('.glb', '.obj')
+    ruta_salida = ruta_archivo.replace(".glb", ".obj")
     scene.export(ruta_salida)
 
     print(f"¡Conversión completada! Archivo generado en: {ruta_salida}")

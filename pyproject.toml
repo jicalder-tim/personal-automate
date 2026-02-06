@@ -15,4 +15,8 @@ dependencies = [
     "mediapipe==0.10.14",
     "pyautogui>=0.9.54",
     "numpy>=2.4.2",
+    "ruff>=0.15.0",
+    "cadquery>=2.6.1",
+    "ezdxf>=1.4.3",
+    "trimesh>=4.11.1",
 ]

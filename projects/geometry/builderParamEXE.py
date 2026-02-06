@@ -1,13 +1,15 @@
-import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
-import cadquery as cq
 import math
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+
+import cadquery as cq
 
 
 # --- FUNCIONES DE SEGURIDAD ---
 def safe_union(obj_base, obj_add):
     try:
-        if obj_add.vals(): return obj_base.union(obj_add)
+        if obj_add.vals():
+            return obj_base.union(obj_add)
     except:
         pass
     return obj_base
@@ -15,14 +17,17 @@ def safe_union(obj_base, obj_add):
 
 def safe_cut(obj_base, obj_sub):
     try:
-        if obj_sub.vals(): return obj_base.cut(obj_sub)
+        if obj_sub.vals():
+            return obj_base.cut(obj_sub)
     except:
         pass
     return obj_base
 
 
 # --- GENERADOR DE RIELES (CORRECCIÓN TRIGONOMÉTRICA) ---
-def crear_riel_trigonometrico(largo_costura, h_proyeccion, w_base, angulo_grados, orientacion, tipo, tolerancia):
+def crear_riel_trigonometrico(
+    largo_costura, h_proyeccion, w_base, angulo_grados, orientacion, tipo, tolerancia
+):
     """
     Crea un riel con compensación geométrica exacta para el ángulo.
     """
@@ -43,7 +48,7 @@ def crear_riel_trigonometrico(largo_costura, h_proyeccion, w_base, angulo_grados
 
     # --- CÁLCULO DE DIMENSIONES ---
 
-    if tipo == 'MACHO':
+    if tipo == "MACHO":
         # El macho respeta las medidas nominales
         h_final = h_proyeccion
         w_b_final = w_base
@@ -86,16 +91,16 @@ def crear_riel_trigonometrico(largo_costura, h_proyeccion, w_base, angulo_grados
         (z_start, -w_b_final / 2.0),
         (h_final, -w_t_final / 2.0),
         (h_final, w_t_final / 2.0),
-        (z_start, w_b_final / 2.0)
+        (z_start, w_b_final / 2.0),
     ]
 
     # --- EXTRUSIÓN ---
-    if orientacion == 'VERTICAL_Y':
+    if orientacion == "VERTICAL_Y":
         # Riel corre en Y. Diente apunta en X. Perfil en plano XZ.
         wire = cq.Workplane("XZ").polyline(pts).close()
         riel = wire.extrude(largo_final / 2.0, both=True)
 
-    elif orientacion == 'HORIZONTAL_X':
+    elif orientacion == "HORIZONTAL_X":
         # Riel corre en X. Diente apunta en Y. Perfil en plano YZ.
         wire = cq.Workplane("YZ").polyline(pts).close()
         riel = wire.extrude(largo_final / 2.0, both=True)
@@ -154,7 +159,8 @@ def generar_stl():
         root.update()
         for i, pt in enumerate(pts):
             placa = placa.cut(esfera.translate((pt[0], pt[1], z_esfera)))
-            if i % 20 == 0: root.update()
+            if i % 20 == 0:
+                root.update()
 
         marco = cq.Workplane("XY").box(ancho_tot, largo_tot, h_marco)
         marco = marco.cut(cq.Workplane("XY").box(ancho_int, largo_int, h_marco))
@@ -163,8 +169,11 @@ def generar_stl():
         modelo = placa.union(marco)
 
         if not dividir:
-            filepath = filedialog.asksaveasfilename(defaultextension=".stl", filetypes=[("STL", "*.stl")])
-            if filepath: cq.exporters.export(modelo, filepath)
+            filepath = filedialog.asksaveasfilename(
+                defaultextension=".stl", filetypes=[("STL", "*.stl")]
+            )
+            if filepath:
+                cq.exporters.export(modelo, filepath)
             return
 
         # --- 3. DIVISIÓN ---
@@ -173,10 +182,18 @@ def generar_stl():
 
         s = max(ancho_tot, largo_tot) * 2.0
 
-        box_A = cq.Workplane("XY").box(s, s, s).translate((-s / 2, s / 2, 0))  # Top-Left
-        box_B = cq.Workplane("XY").box(s, s, s).translate((s / 2, s / 2, 0))  # Top-Right
-        box_C = cq.Workplane("XY").box(s, s, s).translate((-s / 2, -s / 2, 0))  # Bot-Left
-        box_D = cq.Workplane("XY").box(s, s, s).translate((s / 2, -s / 2, 0))  # Bot-Right
+        box_A = (
+            cq.Workplane("XY").box(s, s, s).translate((-s / 2, s / 2, 0))
+        )  # Top-Left
+        box_B = (
+            cq.Workplane("XY").box(s, s, s).translate((s / 2, s / 2, 0))
+        )  # Top-Right
+        box_C = (
+            cq.Workplane("XY").box(s, s, s).translate((-s / 2, -s / 2, 0))
+        )  # Bot-Left
+        box_D = (
+            cq.Workplane("XY").box(s, s, s).translate((s / 2, -s / 2, 0))
+        )  # Bot-Right
 
         base_A = modelo.intersect(box_A)
         base_B = modelo.intersect(box_B)
@@ -184,9 +201,9 @@ def generar_stl():
         base_D = modelo.intersect(box_D)
 
         if not usar_rieles:
-            cq.exporters.export(base_A, "1_A.stl");
+            cq.exporters.export(base_A, "1_A.stl")
             cq.exporters.export(base_B, "2_B.stl")
-            cq.exporters.export(base_C, "3_C.stl");
+            cq.exporters.export(base_C, "3_C.stl")
             cq.exporters.export(base_D, "4_D.stl")
             return
 
@@ -204,45 +221,101 @@ def generar_stl():
         # === A. RIELES VERTICALES ===
 
         # Superior (Para A y B)
-        rv_macho_sup = crear_riel_trigonometrico(len_macho_vert, RIEL_PROYECCION, RIEL_ANCHO_BASE, RIEL_ANGULO,
-                                                 'VERTICAL_Y', 'MACHO', tol)
+        rv_macho_sup = crear_riel_trigonometrico(
+            len_macho_vert,
+            RIEL_PROYECCION,
+            RIEL_ANCHO_BASE,
+            RIEL_ANGULO,
+            "VERTICAL_Y",
+            "MACHO",
+            tol,
+        )
         y_center_sup_macho = (cuadrante_Y + GAP_CENTRAL) / 2.0
         rv_macho_sup = rv_macho_sup.translate((0, y_center_sup_macho, 0))
 
-        rv_hembra_sup = crear_riel_trigonometrico(len_hembra_vert, RIEL_PROYECCION, RIEL_ANCHO_BASE, RIEL_ANGULO,
-                                                  'VERTICAL_Y', 'HEMBRA', tol)
+        rv_hembra_sup = crear_riel_trigonometrico(
+            len_hembra_vert,
+            RIEL_PROYECCION,
+            RIEL_ANCHO_BASE,
+            RIEL_ANGULO,
+            "VERTICAL_Y",
+            "HEMBRA",
+            tol,
+        )
         rv_hembra_sup = rv_hembra_sup.translate((0, cuadrante_Y / 2.0, 0))
 
         # Inferior (Para C y D)
-        rv_macho_inf = crear_riel_trigonometrico(len_macho_vert, RIEL_PROYECCION, RIEL_ANCHO_BASE, RIEL_ANGULO,
-                                                 'VERTICAL_Y', 'MACHO', tol)
+        rv_macho_inf = crear_riel_trigonometrico(
+            len_macho_vert,
+            RIEL_PROYECCION,
+            RIEL_ANCHO_BASE,
+            RIEL_ANGULO,
+            "VERTICAL_Y",
+            "MACHO",
+            tol,
+        )
         y_center_inf_macho = -(cuadrante_Y + GAP_CENTRAL) / 2.0
         rv_macho_inf = rv_macho_inf.translate((0, y_center_inf_macho, 0))
 
-        rv_hembra_inf = crear_riel_trigonometrico(len_hembra_vert, RIEL_PROYECCION, RIEL_ANCHO_BASE, RIEL_ANGULO,
-                                                  'VERTICAL_Y', 'HEMBRA', tol)
+        rv_hembra_inf = crear_riel_trigonometrico(
+            len_hembra_vert,
+            RIEL_PROYECCION,
+            RIEL_ANCHO_BASE,
+            RIEL_ANGULO,
+            "VERTICAL_Y",
+            "HEMBRA",
+            tol,
+        )
         rv_hembra_inf = rv_hembra_inf.translate((0, -cuadrante_Y / 2.0, 0))
 
         # === B. RIELES HORIZONTALES ===
 
         # Izquierdo (Para C y A)
-        rh_macho_izq = crear_riel_trigonometrico(len_macho_horiz, RIEL_PROYECCION, RIEL_ANCHO_BASE, RIEL_ANGULO,
-                                                 'HORIZONTAL_X', 'MACHO', tol)
+        rh_macho_izq = crear_riel_trigonometrico(
+            len_macho_horiz,
+            RIEL_PROYECCION,
+            RIEL_ANCHO_BASE,
+            RIEL_ANGULO,
+            "HORIZONTAL_X",
+            "MACHO",
+            tol,
+        )
         x_center_macho_izq = -(cuadrante_X + GAP_CENTRAL) / 2.0
         rh_macho_izq = rh_macho_izq.translate((x_center_macho_izq, 0, 0))
 
-        rh_hembra_izq = crear_riel_trigonometrico(len_hembra_horiz, RIEL_PROYECCION, RIEL_ANCHO_BASE, RIEL_ANGULO,
-                                                  'HORIZONTAL_X', 'HEMBRA', tol)
+        rh_hembra_izq = crear_riel_trigonometrico(
+            len_hembra_horiz,
+            RIEL_PROYECCION,
+            RIEL_ANCHO_BASE,
+            RIEL_ANGULO,
+            "HORIZONTAL_X",
+            "HEMBRA",
+            tol,
+        )
         rh_hembra_izq = rh_hembra_izq.translate((-cuadrante_X / 2.0, 0, 0))
 
         # Derecho (Para D y B)
-        rh_macho_der = crear_riel_trigonometrico(len_macho_horiz, RIEL_PROYECCION, RIEL_ANCHO_BASE, RIEL_ANGULO,
-                                                 'HORIZONTAL_X', 'MACHO', tol)
+        rh_macho_der = crear_riel_trigonometrico(
+            len_macho_horiz,
+            RIEL_PROYECCION,
+            RIEL_ANCHO_BASE,
+            RIEL_ANGULO,
+            "HORIZONTAL_X",
+            "MACHO",
+            tol,
+        )
         x_center_macho_der = (cuadrante_X + GAP_CENTRAL) / 2.0
         rh_macho_der = rh_macho_der.translate((x_center_macho_der, 0, 0))
 
-        rh_hembra_der = crear_riel_trigonometrico(len_hembra_horiz, RIEL_PROYECCION, RIEL_ANCHO_BASE, RIEL_ANGULO,
-                                                  'HORIZONTAL_X', 'HEMBRA', tol)
+        rh_hembra_der = crear_riel_trigonometrico(
+            len_hembra_horiz,
+            RIEL_PROYECCION,
+            RIEL_ANCHO_BASE,
+            RIEL_ANGULO,
+            "HORIZONTAL_X",
+            "HEMBRA",
+            tol,
+        )
         rh_hembra_der = rh_hembra_der.translate((cuadrante_X / 2.0, 0, 0))
 
         # --- 5. ENSAMBLAJE FINAL ---
@@ -285,8 +358,8 @@ main.pack()
 
 def inp(txt, r, val):
     ttk.Label(main, text=txt).grid(column=0, row=r, sticky="w")
-    e = ttk.Entry(main);
-    e.insert(0, val);
+    e = ttk.Entry(main)
+    e.insert(0, val)
     e.grid(column=1, row=r)
     return e
 
@@ -306,10 +379,12 @@ entry_riel_proyeccion = inp("Proyección (Largo Diente):", 11, 8.0)
 entry_riel_ancho = inp("Ancho Base Riel:", 12, 6.0)
 entry_riel_angulo = inp("Ángulo Cono (grados):", 13, 60.0)
 entry_tolerancia = inp("Tolerancia (Gap):", 14, 0.2)
-var_dividir = tk.BooleanVar(value=True);
+var_dividir = tk.BooleanVar(value=True)
 ttk.Checkbutton(main, text="Dividir", variable=var_dividir).grid(column=0, row=15)
-var_rieles = tk.BooleanVar(value=True);
+var_rieles = tk.BooleanVar(value=True)
 ttk.Checkbutton(main, text="Generar Rieles", variable=var_rieles).grid(column=0, row=16)
-ttk.Button(main, text="GENERAR", command=generar_stl).grid(column=0, row=17, columnspan=2, pady=15)
+ttk.Button(main, text="GENERAR", command=generar_stl).grid(
+    column=0, row=17, columnspan=2, pady=15
+)
 
 root.mainloop()

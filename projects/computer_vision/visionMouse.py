@@ -1,8 +1,6 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-import time
-import pyautogui
 
 # --- ESTÉTICA DE MARCA (Colores Neon) ---
 C_UI = (255, 191, 0)  # Cian Eléctrico
@@ -43,7 +41,8 @@ class AuraUI:
         cap = cv2.VideoCapture(0)
         while cap.isOpened():
             ret, frame = cap.read()
-            if not ret: break
+            if not ret:
+                break
             frame = cv2.flip(frame, 1)
             h, w, _ = frame.shape
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -56,7 +55,7 @@ class AuraUI:
             if face_res.multi_face_landmarks:
                 lms = face_res.multi_face_landmarks[0].landmark
                 # Diferencia entre frente (10) y barbilla (152) para detectar inclinación
-                pitch = (lms[10].y - lms[152].y)
+                pitch = lms[10].y - lms[152].y
                 self.smooth_pitch = 0.1 * pitch + 0.9 * self.smooth_pitch
 
                 # Si la cabeza baja mucho (smooth_pitch > umbral), alerta
@@ -87,20 +86,31 @@ class AuraUI:
 
             # 3. RENDERIZADO DE INTERFAZ "PRODUCTO"
             # Panel de Control
-            self.draw_glass_panel(frame, 30, 30, 200, 80, "AUDIO SPATIAL", self.volume_level)
+            self.draw_glass_panel(
+                frame, 30, 30, 200, 80, "AUDIO SPATIAL", self.volume_level
+            )
 
             # Alerta de Salud
             if self.posture_warning:
                 overlay = frame.copy()
                 cv2.rectangle(overlay, (0, 0), (w, h), C_ALERT, -1)
                 cv2.addWeighted(overlay, 0.2, frame, 0.8, 0, frame)
-                cv2.putText(frame, "MEJORA TU POSTURA", (w // 2 - 100, h - 50), 0, 0.8, (255, 255, 255), 2)
+                cv2.putText(
+                    frame,
+                    "MEJORA TU POSTURA",
+                    (w // 2 - 100, h - 50),
+                    0,
+                    0.8,
+                    (255, 255, 255),
+                    2,
+                )
 
             # Estética Cyberpunk (Esquinas)
             cv2.putText(frame, "AURA OS v1.0", (w - 150, 30), 0, 0.5, C_UI, 1)
 
             cv2.imshow("Aura Spatial Controller", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'): break
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
 
         cap.release()
         cv2.destroyAllWindows()

@@ -1,8 +1,8 @@
 import streamlit as st
 from src.state.session import init_session
-from src.ui.styles import CSS
-from src.ui.sidebar import render_sidebar
 from src.ui.calculator import render_calculator
+from src.ui.sidebar import render_sidebar
+from src.ui.styles import CSS
 from src.ui.visuals import render_visuals
 
 # =============================================================================

@@ -1,19 +1,22 @@
-import pandas as pd
 from io import BytesIO
+import pandas as pd
 import streamlit as st
+from typing import TypedDict, List, Optional
 
 @st.cache_data(show_spinner=False)
 def load_data_fast(file_bytes, filename):
     try:
         data = BytesIO(file_bytes)
-        if filename.endswith('.csv'):
+        if filename.endswith(".csv"):
             try:
                 preview = pd.read_csv(data, nrows=5)
                 data.seek(0)
                 date_cols = []
                 for col in preview.columns:
                     cl = col.lower()
-                    if cl == 't' or any(x in cl for x in ['timestamp', 'date', 'time', 'fecha']):
+                    if cl == "t" or any(
+                        x in cl for x in ["timestamp", "date", "time", "fecha"]
+                    ):
                         date_cols.append(col)
                 if date_cols:
                     df = pd.read_csv(data, parse_dates=date_cols)
@@ -22,26 +25,28 @@ def load_data_fast(file_bytes, filename):
             except:
                 data.seek(0)
                 df = pd.read_csv(data)
-        elif filename.endswith(('.xlsx', '.xls')):
+        elif filename.endswith((".xlsx", ".xls")):
             df = pd.read_excel(data)
         else:
             try:
                 df = pd.read_csv(data)
             except:
                 data.seek(0)
-                df = pd.read_csv(data, sep=None, engine='python')
+                df = pd.read_csv(data, sep=None, engine="python")
 
         df.columns = df.columns.str.strip()
 
         for c in df.columns:
             is_potential_date = False
             if df[c].dtype == object or pd.api.types.is_numeric_dtype(df[c]):
-                if c.lower() == 't' or any(x in c.lower() for x in ['timestamp', 'date', 'time']):
+                if c.lower() == "t" or any(
+                    x in c.lower() for x in ["timestamp", "date", "time"]
+                ):
                     is_potential_date = True
 
             if is_potential_date or pd.api.types.is_datetime64_any_dtype(df[c]):
                 try:
-                    df[c] = pd.to_datetime(df[c], utc=True, errors='coerce')
+                    df[c] = pd.to_datetime(df[c], utc=True, errors="coerce")
                     if df[c].dt.tz is not None:
                         df[c] = df[c].dt.tz_localize(None)
                     continue
@@ -50,26 +55,45 @@ def load_data_fast(file_bytes, filename):
 
             if df[c].dtype == object:
                 sample = df[c].dropna().head(50)
-                if not sample.empty and sample.astype(str).str.match(r'^-?\d+(\.\d+)?$').all():
-                    df[c] = pd.to_numeric(df[c], errors='coerce')
+                if (
+                    not sample.empty
+                    and sample.astype(str).str.match(r"^-?\d+(\.\d+)?$").all()
+                ):
+                    df[c] = pd.to_numeric(df[c], errors="coerce")
         return df
     except Exception as e:
         return str(e)
 
 
-def detect_roles_fast(df):
-    roles = {"time": None, "entity": None, "spatial": {"x": None, "y": None, "z": None}, "numeric": []}
+class SpatialRole(TypedDict):
+    x: Optional[str]
+    y: Optional[str]
+    z: Optional[str]
 
-    for c in df.select_dtypes(include=['datetime']).columns:
-        if c.lower() in ['t', 'timestamp', 'time', 'fecha', 'date']:
+class Roles(TypedDict):
+    time: Optional[str]
+    entity: Optional[str]
+    spatial: SpatialRole
+    numeric: List[str]
+
+def detect_roles_fast(df) -> Roles:
+    roles: Roles = {
+        "time": None,
+        "entity": None,
+        "spatial": {"x": None, "y": None, "z": None},
+        "numeric": [],
+    }
+
+    for c in df.select_dtypes(include=["datetime"]).columns:
+        if c.lower() in ["t", "timestamp", "time", "fecha", "date"]:
             roles["time"] = c
             break
     if roles["time"] is None:
-        for c in df.select_dtypes(include=['datetime']).columns:
+        for c in df.select_dtypes(include=["datetime"]).columns:
             roles["time"] = c
             break
 
-    for c in df.select_dtypes(include=['number']).columns:
+    for c in df.select_dtypes(include=["number"]).columns:
         cl = c.lower()
         if cl in ["x", "easting", "lon", "longitude"]:
             roles["spatial"]["x"] = c
@@ -80,7 +104,7 @@ def detect_roles_fast(df):
         else:
             roles["numeric"].append(c)
 
-    for c in df.select_dtypes(include=['object', 'category']).columns:
+    for c in df.select_dtypes(include=["object", "category"]).columns:
         if roles["entity"] is None and df[c].nunique() < 400:
             roles["entity"] = c
     return roles

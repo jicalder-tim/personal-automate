@@ -1,9 +1,13 @@
-import pandas as pd
 import csv
 import io
 import os  # Necesario para manejar nombres y rutas de archivos
 import tkinter as tk  # Para la interfaz gráfica
-from tkinter import filedialog, messagebox  # Para los diálogos de "abrir archivo" y "mensajes"
+from tkinter import (  # Para los diálogos de "abrir archivo" y "mensajes"
+    filedialog,
+    messagebox,
+)
+
+import pandas as pd
 
 
 # ===================================================================
@@ -18,11 +22,24 @@ def procesar_reporte_inventario(contenido_archivo):
 
     # 1. Definición de Columnas
     nombres_columnas_datos = [
-        "Nombre Materia Prima", "IdArt", "UnidInv", "InvInic", "UnidComp", "InvFinal",
-        "CostxUnid", "TotalFinal", "Días a la Mano",
-        "UsoUnid_Real", "UsoUnid_Teórico", "UsoUnid_Variación",
-        "ValorUso_Real", "ValorUso_Teórico", "ValorUso_Variación",
-        "PorcUso_Real", "PorcUso_Teórico", "PorcUso_Variación"
+        "Nombre Materia Prima",
+        "IdArt",
+        "UnidInv",
+        "InvInic",
+        "UnidComp",
+        "InvFinal",
+        "CostxUnid",
+        "TotalFinal",
+        "Días a la Mano",
+        "UsoUnid_Real",
+        "UsoUnid_Teórico",
+        "UsoUnid_Variación",
+        "ValorUso_Real",
+        "ValorUso_Teórico",
+        "ValorUso_Variación",
+        "PorcUso_Real",
+        "PorcUso_Teórico",
+        "PorcUso_Variación",
     ]
 
     columnas_finales = ["Categoria", "Subcategoria"] + nombres_columnas_datos
@@ -39,23 +56,24 @@ def procesar_reporte_inventario(contenido_archivo):
         linea = linea.strip()
 
         # --- REGLAS DE OMISIÓN (JUNK) ---
-        if (not linea or
-                linea.startswith("Copyright") or
-                linea.startswith("*El Cálculo") or
-                linea.startswith("Theoretical") or
-                linea.startswith("V 21.1.158.0") or
-                "3243.CEC .LaFlorida" in linea or
-                linea.startswith("UsoenUnid,Valor $ Uso") or
-                linea.startswith("Nombre Materia Prima") or
-                linea.startswith("IdArt,UnidInv") or
-                linea.startswith("VentasNetas:")
+        if (
+            not linea
+            or linea.startswith("Copyright")
+            or linea.startswith("*El Cálculo")
+            or linea.startswith("Theoretical")
+            or linea.startswith("V 21.1.158.0")
+            or "3243.CEC .LaFlorida" in linea
+            or linea.startswith("UsoenUnid,Valor $ Uso")
+            or linea.startswith("Nombre Materia Prima")
+            or linea.startswith("IdArt,UnidInv")
+            or linea.startswith("VentasNetas:")
         ):
             continue
 
         # --- REGLAS DE ESTADO (CATEGORÍAS) ---
         if linea.startswith("Total:"):
             if linea.startswith("Total:,") and "," in linea:
-                partes = linea.split(',')
+                partes = linea.split(",")
                 if len(partes) > 1:
                     nombre_total = partes[1].strip()
                     if nombre_total == subcategoria_actual:
@@ -65,11 +83,12 @@ def procesar_reporte_inventario(contenido_archivo):
                         subcategoria_actual = None
             continue
 
-        if (linea.isupper() and
-                ',' not in linea and
-                '$' not in linea and
-                not any(c.isdigit() for c in linea)):
-
+        if (
+            linea.isupper()
+            and "," not in linea
+            and "$" not in linea
+            and not any(c.isdigit() for c in linea)
+        ):
             if categoria_actual is None:
                 categoria_actual = linea
             elif subcategoria_actual is None or subcategoria_actual == categoria_actual:
@@ -102,7 +121,9 @@ def procesar_reporte_inventario(contenido_archivo):
             continue
 
     # 4. Creación del DataFrame
-    print(f"Procesamiento finalizado. Se encontraron {len(datos_procesados)} registros.")
+    print(
+        f"Procesamiento finalizado. Se encontraron {len(datos_procesados)} registros."
+    )
 
     if not datos_procesados:
         print("No se encontraron datos para crear el DataFrame.")
@@ -133,7 +154,7 @@ def ejecutar_procesador():
     # Abrir la ventana de "Abrir Archivo"
     filepath = filedialog.askopenfilename(
         title="Selecciona el archivo TXT de inventario",
-        filetypes=[("Archivos de Texto", "*.txt"), ("Todos los archivos", "*.*")]
+        filetypes=[("Archivos de Texto", "*.txt"), ("Todos los archivos", "*.*")],
     )
 
     # Si el usuario cancela, filepath estará vacío
@@ -162,7 +183,7 @@ def ejecutar_procesador():
 
         # --- Leer el archivo de entrada ---
         print("Leyendo archivo...")
-        with open(filepath, 'r', encoding='utf-16-le') as f:
+        with open(filepath, "r", encoding="utf-16-le") as f:
             contenido_completo = f.read()
 
         # --- Procesar usando nuestra función ---
@@ -170,24 +191,25 @@ def ejecutar_procesador():
         df_resultado = procesar_reporte_inventario(contenido_completo)
 
         if df_resultado.empty:
-            raise Exception("No se encontraron datos válidos para procesar en el archivo.")
+            raise Exception(
+                "No se encontraron datos válidos para procesar en el archivo."
+            )
 
         # --- Guardar el CSV ---
         print(f"Guardando CSV en: {output_path}")
-        df_resultado.to_csv(output_path, index=False, encoding='utf-8-sig')
+        df_resultado.to_csv(output_path, index=False, encoding="utf-8-sig")
 
         # --- Mostrar mensaje de éxito ---
         messagebox.showinfo(
             "Éxito",
-            f"¡Proceso completado!\n\nEl archivo se ha guardado como:\n{nombre_csv_salida}"
+            f"¡Proceso completado!\n\nEl archivo se ha guardado como:\n{nombre_csv_salida}",
         )
 
     except Exception as e:
         # --- Mostrar mensaje de error ---
         print(f"¡ERROR! {e}")
         messagebox.showerror(
-            "Error",
-            f"Ocurrió un error inesperado durante el procesamiento:\n\n{e}"
+            "Error", f"Ocurrió un error inesperado durante el procesamiento:\n\n{e}"
         )
 
     finally:

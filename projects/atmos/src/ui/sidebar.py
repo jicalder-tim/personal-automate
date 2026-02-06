@@ -1,7 +1,10 @@
-import streamlit as st
 from datetime import timedelta
+
 import pandas as pd
-from ..core.data import load_data_fast, detect_roles_fast
+import streamlit as st
+
+from ..core.data import detect_roles_fast, load_data_fast
+
 
 def render_sidebar():
     with st.sidebar:
@@ -9,7 +12,7 @@ def render_sidebar():
         uploaded_file = st.file_uploader("Datos", type=["csv", "xlsx"], key="upl_main")
 
         if uploaded_file:
-            if st.session_state.get('last_file') != uploaded_file.name:
+            if st.session_state.get("last_file") != uploaded_file.name:
                 with st.spinner("Procesando..."):
                     res = load_data_fast(uploaded_file.getvalue(), uploaded_file.name)
                     if isinstance(res, pd.DataFrame):
@@ -41,8 +44,17 @@ def render_sidebar():
             if pd.notnull(tmin) and pd.notnull(tmax):
                 min_v, max_v = tmin.to_pydatetime(), tmax.to_pydatetime()
                 if min_v != max_v:
-                    trange = st.slider("Rango Temporal", min_value=min_v, max_value=max_v, value=(min_v, max_v),
-                                       format="DD/MM/YY HH:mm", step=timedelta(minutes=1))
-                    df = df[(df[roles["time"]] >= trange[0]) & (df[roles["time"]] <= trange[1])]
-        
+                    trange = st.slider(
+                        "Rango Temporal",
+                        min_value=min_v,
+                        max_value=max_v,
+                        value=(min_v, max_v),
+                        format="DD/MM/YY HH:mm",
+                        step=timedelta(minutes=1),
+                    )
+                    df = df[
+                        (df[roles["time"]] >= trange[0])
+                        & (df[roles["time"]] <= trange[1])
+                    ]
+
         return df
