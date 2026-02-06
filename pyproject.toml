@@ -5,5 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pandas>=3.0.0",
+    "openpyxl>=3.1.5",
+    "pandas>=2.2.0",
+    "plotly>=5.18.0",
+    "streamlit>=1.41.0",
+    "altair>=5.0.0",
+    "watchdog>=4.0.0",
+    "opencv-python>=4.13.0.92",
+    "mediapipe==0.10.14",
+    "pyautogui>=0.9.54",
+    "numpy>=2.4.2",
 ]
