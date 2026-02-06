@@ -1,0 +1,83 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Juypter
+.ipynb_checkpoints
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Environment
+.venv/
+.env
+.env.*
+!.env.example
+dist/
+build/
+*.spec
+
+# Distribution
+*.egg-info/
+
+# Security / Credentials
+secrets/
+credentials/
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa
+id_dsa
+aws_config
+creds.json
+
+# Archives / Compressed Files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.iso
+
+# Media / Big Data Files (Images, 3D, Videos)
+# Uncomment specific extensions if you need to track assets (e.g. UI icons)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tif
+*.tiff
+*.webp
+*.svg
+*.psd
+*.ai
+*.mp4
+*.mov
+*.avi
+*.stl
+*.obj
+*.ply
+*.gltf
+*.glb
+
+# Data Science / Local Data
+*.csv
+*.xlsx
+*.xls
+*.json
+*.parquet
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+data/
+!data/.gitkeep
+
+# Logs
+*.log
